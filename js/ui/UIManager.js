@@ -61,7 +61,7 @@ class UIManager {
     this.aiDebugToggle = document.getElementById('toggle-ai-debug');
     this.touchControlsSelect = document.getElementById('select-touch-controls');
     this.orientationPrompt = document.getElementById('orientation-prompt');
-    this.orientationDismissed = false;
+    this.orientationDismissed = sessionStorage.getItem('orientation_dismissed') === 'true';
 
     // Combo banner timer
     this.comboTimer = null;
@@ -71,17 +71,37 @@ class UIManager {
     this.checkOrientation();
     window.addEventListener('resize', () => this.checkOrientation());
     window.addEventListener('orientationchange', () => this.checkOrientation());
+    if (window.screen && window.screen.orientation) {
+      window.screen.orientation.addEventListener('change', () => this.checkOrientation());
+    }
   }
 
   checkOrientation() {
-    if (!this.orientationPrompt || this.orientationDismissed) return;
-    const isPortrait = window.innerHeight > window.innerWidth;
-    const isSmallDevice = window.innerWidth <= 820;
+    if (!this.orientationPrompt) return;
+    if (this.orientationDismissed) {
+      this.orientationPrompt.classList.add('hidden', 'dismissed');
+      this.orientationPrompt.style.display = 'none';
+      return;
+    }
+
+    // Determine orientation reliably
+    let isPortrait = false;
+    if (window.screen && window.screen.orientation && window.screen.orientation.type) {
+      isPortrait = window.screen.orientation.type.startsWith('portrait');
+    } else if (typeof window.orientation !== 'undefined') {
+      isPortrait = window.orientation === 0 || window.orientation === 180;
+    } else {
+      isPortrait = window.innerHeight > window.innerWidth;
+    }
+
+    const isSmallDevice = Math.min(window.innerWidth, window.innerHeight) <= 768;
 
     if (isPortrait && isSmallDevice) {
       this.orientationPrompt.classList.remove('hidden');
+      this.orientationPrompt.style.display = 'flex';
     } else {
       this.orientationPrompt.classList.add('hidden');
+      this.orientationPrompt.style.display = 'none';
     }
   }
 
@@ -188,9 +208,15 @@ class UIManager {
 
     const btnDismissOrientation = document.getElementById('btn-dismiss-orientation');
     if (btnDismissOrientation) {
-      btnDismissOrientation.addEventListener('click', () => {
+      btnDismissOrientation.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         this.orientationDismissed = true;
-        if (this.orientationPrompt) this.orientationPrompt.classList.add('hidden');
+        try { sessionStorage.setItem('orientation_dismissed', 'true'); } catch (err) {}
+        if (this.orientationPrompt) {
+          this.orientationPrompt.classList.add('dismissed', 'hidden');
+          this.orientationPrompt.style.display = 'none';
+        }
       });
     }
 

@@ -200,15 +200,18 @@ class InputManager {
     } else if (this.touchMode === 'never') {
       shouldShow = false;
     } else {
-      // Auto: show if touch device or screen width <= 1024
+      // Auto: show if touch device or mobile/tablet screen dimensions
+      const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || this.isTouchDevice;
       const isMobileScreen = window.innerWidth <= 1024 || window.innerHeight <= 600;
-      shouldShow = isMatchActive && (this.isTouchDevice || isMobileScreen);
+      shouldShow = isMatchActive && (isTouch || isMobileScreen);
     }
 
     if (shouldShow) {
       el.classList.remove('hidden');
+      el.style.display = 'flex';
     } else {
       el.classList.add('hidden');
+      el.style.display = 'none';
     }
   }
 
