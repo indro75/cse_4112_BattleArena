@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#050811">
+  <title>AI Battle Arena - 2D Cyberpunk Combat</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="game-container">
+    <!-- Canvas for 2D Game Rendering -->
+    <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+    <!-- Top In-Game HUD -->
+    <div id="battle-hud" class="hud-overlay hidden">
+      <!-- Player Health & Energy -->
+      <div class="fighter-hud player-hud">
+        <div class="fighter-portrait">
+          <div class="portrait-box cyan-glow">
+            <span class="portrait-icon">⚡</span>
+          </div>
+          <div class="fighter-identity">
+            <span class="fighter-name">PLAYER</span>
+            <span class="fighter-title">CYBER WARRIOR</span>
+          </div>
+        </div>
+        <div class="bars-container">
+          <div class="bar-frame health-frame">
+            <div id="player-health-lag" class="bar-lag"></div>
+            <div id="player-health-bar" class="bar-fill health-fill cyan-bar"></div>
+            <span id="player-health-text" class="bar-text">1000 / 1000</span>
+          </div>
+          <div class="bar-frame energy-frame">
+            <div id="player-energy-bar" class="bar-fill energy-fill cyan-energy"></div>
+            <span id="player-energy-text" class="bar-text">100 / 100 SP</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Match Timer & Difficulty -->
+      <div class="center-hud">
+        <div class="timer-box">
+          <span id="round-timer">99</span>
+        </div>
+        <div id="difficulty-badge" class="badge-medium">MEDIUM</div>
+        <button id="btn-pause-ingame" class="hud-btn" title="Pause Game (Esc)">⏸</button>
+      </div>
+
+      <!-- AI Health & Energy -->
+      <div class="fighter-hud ai-hud">
+        <div class="fighter-portrait reverse">
+          <div class="portrait-box crimson-glow">
+            <span class="portrait-icon">🤖</span>
+          </div>
+          <div class="fighter-identity text-right">
+            <span class="fighter-name">NEXUS-9</span>
+            <span class="fighter-title" id="ai-mode-title">AI SYNTHETIC</span>
+          </div>
+        </div>
+        <div class="bars-container reverse">
+          <div class="bar-frame health-frame">
+            <div id="ai-health-lag" class="bar-lag"></div>
+            <div id="ai-health-bar" class="bar-fill health-fill crimson-bar"></div>
+            <span id="ai-health-text" class="bar-text">1000 / 1000</span>
+          </div>
+          <div class="bar-frame energy-frame">
+            <div id="ai-energy-bar" class="bar-fill energy-fill crimson-energy"></div>
+            <span id="ai-energy-text" class="bar-text">100 / 100 SP</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Combo Announcement -->
+    <div id="combo-display" class="combo-banner hidden">
+      <div id="combo-hits" class="combo-number">2</div>
+      <div class="combo-label">COMBO!</div>
+    </div>
+
+    <!-- AI Brain Visualizer HUD (Toggleable in Settings) -->
+    <div id="ai-debug-hud" class="ai-inspector hidden">
+      <div class="inspector-header">
+        <span>🧠 NEXUS-9 AI CORE</span>
+        <span id="ai-state-indicator" class="ai-state-pill">IDLE</span>
+      </div>
+      <div class="inspector-body">
+        <div class="inspector-row">
+          <span>Behavior Node:</span>
+          <span id="ai-btree-node" class="highlight-text">CombatSelector</span>
+        </div>
+        <div class="inspector-row">
+          <span>Target Distance:</span>
+          <span id="ai-distance-val">0 px</span>
+        </div>
+        <div class="inspector-row">
+          <span>Player Jump Tendency:</span>
+          <div class="mini-bar-wrap"><div id="ai-stat-jump" class="mini-bar"></div></div>
+        </div>
+        <div class="inspector-row">
+          <span>Player Spam Tendency:</span>
+          <div class="mini-bar-wrap"><div id="ai-stat-spam" class="mini-bar"></div></div>
+        </div>
+        <div class="inspector-row">
+          <span>Player Guard Tendency:</span>
+          <div class="mini-bar-wrap"><div id="ai-stat-guard" class="mini-bar"></div></div>
+        </div>
+        <div class="inspector-row">
+          <span>AI Predicted Action:</span>
+          <span id="ai-predicted-action" class="highlight-cyan">INTERCEPT</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Virtual Touch Controls for Mobile Devices -->
+    <div id="virtual-controls" class="virtual-controls-layer hidden">
+      <!-- Left D-Pad Controls -->
+      <div class="touch-cluster touch-dpad">
+        <button class="touch-btn dpad-btn dpad-up" data-action="jump" title="Jump">
+          <span class="touch-icon">▲</span>
+        </button>
+        <div class="dpad-horizontal">
+          <button class="touch-btn dpad-btn dpad-left" data-action="moveLeft" title="Move Left">
+            <span class="touch-icon">◀</span>
+          </button>
+          <button class="touch-btn dpad-btn dpad-center" data-action="none">
+            <span class="touch-center-dot"></span>
+          </button>
+          <button class="touch-btn dpad-btn dpad-right" data-action="moveRight" title="Move Right">
+            <span class="touch-icon">▶</span>
+          </button>
+        </div>
+        <button class="touch-btn dpad-btn dpad-down" data-action="crouch" title="Crouch">
+          <span class="touch-icon">▼</span>
+        </button>
+      </div>
+
+      <!-- Right Action Combat Buttons -->
+      <div class="touch-cluster touch-actions">
+        <!-- Top Row: Block & Dodge -->
+        <div class="action-row top-action-row">
+          <button class="touch-btn action-btn btn-shield" data-action="block" title="Block">
+            <span class="action-icon">🛡️</span>
+            <span class="action-sub">BLOCK</span>
+          </button>
+          <button class="touch-btn action-btn btn-dodge" data-action="dodge" title="Dodge">
+            <span class="action-icon">💨</span>
+            <span class="action-sub">DASH</span>
+          </button>
+        </div>
+        <!-- Bottom Row: Special & Basic Attack -->
+        <div class="action-row bottom-action-row">
+          <button class="touch-btn action-btn btn-special" data-action="special" title="Special Attack">
+            <span class="action-icon">⚡</span>
+            <span class="action-sub">SPECIAL</span>
+          </button>
+          <button class="touch-btn action-btn btn-attack primary-attack" data-action="attack" title="Basic Attack">
+            <span class="action-icon">⚔️</span>
+            <span class="action-sub">ATTACK</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Orientation Hint for Portrait Mode on Mobile -->
+    <div id="orientation-prompt" class="orientation-banner hidden">
+      <div class="orientation-content">
+        <span class="rotate-icon">📱 ➔ 📲</span>
+        <div class="orientation-text">
+          <strong>LANDSCAPE RECOMMENDED</strong>
+          <span>Rotate device for the ultimate combat arena experience</span>
+        </div>
+        <button id="btn-dismiss-orientation" class="dismiss-btn">✕</button>
+      </div>
+    </div>
+
+    <!-- MAIN MENU OVERLAY -->
+    <div id="main-menu" class="overlay-screen active">
+      <div class="cyber-scanlines"></div>
+      <div class="menu-content">
+        <div class="cyber-title-group">
+          <div class="cyber-subtitle">NEURAL COMBAT SIMULATION</div>
+          <h1 class="glitch-title" data-text="AI BATTLE ARENA">AI BATTLE ARENA</h1>
+          <div class="cyber-divider"></div>
+        </div>
+
+        <div class="menu-buttons">
+          <button id="btn-start-game" class="cyber-btn primary-btn">
+            <span class="btn-glitch"></span>
+            <span class="btn-text">⚔ START BATTLE</span>
+          </button>
+
+          <button id="btn-difficulty-menu" class="cyber-btn">
+            <span class="btn-text">⚙ DIFFICULTY: <span id="current-diff-label" class="diff-highlight">MEDIUM</span></span>
+          </button>
+
+          <button id="btn-how-to-play" class="cyber-btn">
+            <span class="btn-text">📖 HOW TO PLAY</span>
+          </button>
+
+          <button id="btn-settings" class="cyber-btn">
+            <span class="btn-text">🎛 SETTINGS</span>
+          </button>
+        </div>
+
+        <div class="menu-footer">
+          <span>PRESS [ENTER] TO START BATTLE</span>
+          <span class="version-tag">SYSTEM V2.0 // NEURAL LINK READY</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIFFICULTY SELECTION MODAL -->
+    <div id="difficulty-modal" class="overlay-screen hidden modal">
+      <div class="modal-box">
+        <h2 class="modal-title">SELECT AI DIFFICULTY</h2>
+        <p class="modal-subtitle">Choose the neural processing capability of your opponent</p>
+
+        <div class="difficulty-cards">
+          <!-- Easy -->
+          <div class="diff-card" data-diff="easy">
+            <div class="diff-card-header green-theme">
+              <span class="diff-icon">🟢</span>
+              <h3>EASY MODE</h3>
+            </div>
+            <p class="diff-desc">Standard synthetic training unit. Casual combat pace.</p>
+            <ul class="diff-specs">
+              <li>Attacks occasionally with slow reaction time</li>
+              <li>Rarely blocks or counters</li>
+              <li>Predictable linear movement</li>
+              <li>Limited special attack usage</li>
+            </ul>
+            <button class="cyber-btn select-diff-btn" data-diff="easy">SELECT EASY</button>
+          </div>
+
+          <!-- Medium -->
+          <div class="diff-card selected" data-diff="medium">
+            <div class="diff-card-badge">RECOMMENDED</div>
+            <div class="diff-card-header cyan-theme">
+              <span class="diff-icon">🔷</span>
+              <h3>MEDIUM MODE</h3>
+            </div>
+            <p class="diff-desc">Tactical combat android. Dynamic aggression & response.</p>
+            <ul class="diff-specs">
+              <li>Actively tracks player spacing & jumps</li>
+              <li>Blocks incoming attacks frequently</li>
+              <li>Performs tactical dodges & counter-strikes</li>
+              <li>Fires energy blasts when charged</li>
+            </ul>
+            <button class="cyber-btn select-diff-btn" data-diff="medium">SELECT MEDIUM</button>
+          </div>
+
+          <!-- Hard -->
+          <div class="diff-card" data-diff="hard">
+            <div class="diff-card-header crimson-theme">
+              <span class="diff-icon">💀</span>
+              <h3>HARD MODE</h3>
+            </div>
+            <p class="diff-desc">Self-learning neural killer. Adapts to your every habit.</p>
+            <ul class="diff-specs">
+              <li>Analyzes attack spam, jump habits & block frequency</li>
+              <li>Predictive movement & jump anti-air intercepts</li>
+              <li>Executes 3-hit combo strings into special finishes</li>
+              <li>Bates attacks, dodges behind you & punishes whiffs</li>
+            </ul>
+            <button class="cyber-btn select-diff-btn" data-diff="hard">SELECT HARD</button>
+          </div>
+        </div>
+
+        <button id="btn-close-difficulty" class="cyber-btn cancel-btn">RETURN</button>
+      </div>
+    </div>
+
+    <!-- HOW TO PLAY MODAL -->
+    <div id="how-to-play-modal" class="overlay-screen hidden modal">
+      <div class="modal-box large-modal">
+        <h2 class="modal-title">COMBAT PROTOCOLS & CONTROLS</h2>
+        <div class="how-to-columns">
+          <div class="controls-column">
+            <h3 class="section-title">KEYBOARD CONTROLS</h3>
+            <div class="control-row">
+              <span class="key-cap">A</span> / <span class="key-cap">D</span>
+              <span class="key-cap">←</span> / <span class="key-cap">→</span>
+              <span class="control-desc">Move Left / Right</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">W</span> / <span class="key-cap">↑</span>
+              <span class="control-desc">Jump (Airborne Mobility)</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">S</span> / <span class="key-cap">↓</span>
+              <span class="control-desc">Crouch / Fast Drop</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">J</span>
+              <span class="control-desc">Basic Attack (3-Hit Combo Chain)</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">K</span>
+              <span class="control-desc">Special Attack (Energy Beam Blast - Costs 40 SP)</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">L</span>
+              <span class="control-desc">Block (Mitigates 75% Damage)</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">SHIFT</span>
+              <span class="control-desc">Dodge / Dash (Invulnerability i-Frames)</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">ESC</span>
+              <span class="control-desc">Pause / Resume</span>
+            </div>
+
+            <h3 class="section-title" style="margin-top: 18px;">MOBILE TOUCH CONTROLS</h3>
+            <div class="control-row">
+              <span class="key-cap">◀ / ▶</span>
+              <span class="control-desc">Left D-Pad: Move Left / Right</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">▲ / ▼</span>
+              <span class="control-desc">Left D-Pad: Jump / Crouch</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">⚔️ ATK</span>
+              <span class="control-desc">Basic Attack (3-Hit Combo Chain)</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">⚡ SP</span>
+              <span class="control-desc">Special Plasma Beam Blast</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">🛡️ BLK</span>
+              <span class="control-desc">Hold Shield (Block 75% Damage)</span>
+            </div>
+            <div class="control-row">
+              <span class="key-cap">💨 DASH</span>
+              <span class="control-desc">Dodge / Dash (i-Frames)</span>
+            </div>
+          </div>
+
+          <div class="tips-column">
+            <h3 class="section-title">TACTICAL COMBAT TIPS</h3>
+            <div class="tip-card">
+              <h4>🔥 3-HIT COMBO CHAIN</h4>
+              <p>Press <span class="cyan-text">[J]</span> repeatedly in rhythm to chain Light Slash &rarr; Thrust &rarr; Heavy Uppercut finisher for massive knockback.</p>
+            </div>
+            <div class="tip-card">
+              <h4>🛡️ PARRY & BLOCK</h4>
+              <p>Hold <span class="cyan-text">[L]</span> when facing an opponent's attack. Blocking absorbs 75% damage and negates hitstun, giving you a chance to counterattack.</p>
+            </div>
+            <div class="tip-card">
+              <h4>⚡ DODGE INVULNERABILITY</h4>
+              <p>Press <span class="cyan-text">[SHIFT]</span> to dash through incoming projectiles or slip behind the opponent with temporary invincibility frames.</p>
+            </div>
+            <div class="tip-card">
+              <h4>🤖 ADAPTIVE HARD AI</h4>
+              <p>On Hard difficulty, NEXUS-9 tracks if you repeatedly spam basic attacks or jump carelessly, and will bait you into crushing counter-strikes!</p>
+            </div>
+          </div>
+        </div>
+
+        <button id="btn-close-howtoplay" class="cyber-btn cancel-btn">GOT IT, WARRIOR</button>
+      </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="overlay-screen hidden modal">
+      <div class="modal-box">
+        <h2 class="modal-title">SYSTEM SETTINGS</h2>
+        <div class="settings-list">
+          <div class="setting-item">
+            <label for="music-volume">BATTLE MUSIC VOLUME</label>
+            <div class="slider-wrap">
+              <input type="range" id="music-volume" min="0" max="100" value="65">
+              <span id="music-val-text">65%</span>
+            </div>
+          </div>
+          <div class="setting-item">
+            <label for="sfx-volume">SOUND EFFECTS VOLUME</label>
+            <div class="slider-wrap">
+              <input type="range" id="sfx-volume" min="0" max="100" value="80">
+              <span id="sfx-val-text">80%</span>
+            </div>
+          </div>
+          <div class="setting-item toggle-item">
+            <label for="toggle-screenshake">SCREEN SHAKE EFFECTS</label>
+            <input type="checkbox" id="toggle-screenshake" checked>
+          </div>
+          <div class="setting-item toggle-item">
+            <label for="toggle-particles">NEON PARTICLE FX</label>
+            <input type="checkbox" id="toggle-particles" checked>
+          </div>
+          <div class="setting-item toggle-item">
+            <label for="toggle-ai-debug">SHOW AI NEURAL INSPECTOR HUD</label>
+            <input type="checkbox" id="toggle-ai-debug" checked>
+          </div>
+          <div class="setting-item">
+            <label for="select-touch-controls">ON-SCREEN TOUCH CONTROLS</label>
+            <select id="select-touch-controls" class="cyber-select">
+              <option value="auto" selected>AUTO (TOUCH DEVICES)</option>
+              <option value="always">ALWAYS SHOW</option>
+              <option value="never">ALWAYS HIDE</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="btn-close-settings" class="cyber-btn primary-btn">SAVE & RETURN</button>
+      </div>
+    </div>
+
+    <!-- PAUSE MENU OVERLAY -->
+    <div id="pause-modal" class="overlay-screen hidden modal">
+      <div class="modal-box small-modal">
+        <h2 class="modal-title">COMBAT PAUSED</h2>
+        <div class="pause-buttons">
+          <button id="btn-resume" class="cyber-btn primary-btn">RESUME BATTLE</button>
+          <button id="btn-restart" class="cyber-btn">RESTART MATCH</button>
+          <button id="btn-pause-howtoplay" class="cyber-btn">CONTROLS</button>
+          <button id="btn-quit-to-menu" class="cyber-btn cancel-btn">ABORT TO MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MATCH RESULTS OVERLAY -->
+    <div id="results-modal" class="overlay-screen hidden modal">
+      <div class="modal-box results-box">
+        <div id="results-banner" class="results-banner victory">VICTORY</div>
+        <div id="results-subtitle" class="results-subtitle">NEXUS-9 HAS BEEN DECOMMISSIONED</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <span class="stat-label">BATTLE DURATION</span>
+            <span id="stat-duration" class="stat-value">00:42</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">PLAYER HEALTH LEFT</span>
+            <span id="stat-health" class="stat-value">640 HP (64%)</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">MAX COMBO</span>
+            <span id="stat-max-combo" class="stat-value">5 HITS</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">AI DIFFICULTY</span>
+            <span id="stat-difficulty" class="stat-value">MEDIUM</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">DAMAGE DEALT</span>
+            <span id="stat-damage-dealt" class="stat-value">1000</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">DAMAGE RECEIVED</span>
+            <span id="stat-damage-taken" class="stat-value">360</span>
+          </div>
+        </div>
+
+        <div class="results-actions">
+          <button id="btn-play-again" class="cyber-btn primary-btn">PLAY AGAIN</button>
+          <button id="btn-results-menu" class="cyber-btn">MAIN MENU</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio and Game Logic Scripts in dependency order -->
+  <script src="js/engine/Audio.js"></script>
+  <script src="js/engine/Input.js"></script>
+  <script src="js/engine/Camera.js"></script>
+  <script src="js/engine/Particles.js"></script>
+  <script src="js/combat/DamageText.js"></script>
+  <script src="js/combat/Hitbox.js"></script>
+  <script src="js/combat/CombatSystem.js"></script>
+  <script src="js/arena/Arena.js"></script>
+  <script src="js/entities/Projectile.js"></script>
+  <script src="js/entities/Fighter.js"></script>
+  <script src="js/entities/Player.js"></script>
+  <script src="js/ai/PatternTracker.js"></script>
+  <script src="js/ai/FSM.js"></script>
+  <script src="js/ai/BehaviorTree.js"></script>
+  <script src="js/ai/AIController.js"></script>
+  <script src="js/entities/AIPlayer.js"></script>
+  <script src="js/ui/UIManager.js"></script>
+  <script src="js/engine/Game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
