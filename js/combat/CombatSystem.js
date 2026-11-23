@@ -183,10 +183,15 @@ class CombatSystem {
       window.audioManager.playHit(isHeavy);
     }
 
-    // Visual Sparks & Cyber Blood
+    // Visual Sparks, Anime Starbursts & Cyber Blood
     const sparkColor = attackerRole === 'player' ? '#00f0ff' : '#ff0055';
     window.particleSystem.emitSparks(impactX, impactY, '#ffea00', isHeavy ? 24 : 14, isHeavy ? 450 : 250);
     window.particleSystem.emitCyberBlood(impactX, impactY, sparkColor, isHeavy ? 18 : 10);
+    window.particleSystem.emitAnimeHitStarburst(impactX, impactY, isHeavy ? '#ffea00' : sparkColor, isHeavy);
+    window.particleSystem.emitSpeedlines(impactX, impactY, knockDir, isHeavy);
+    if (isHeavy) {
+      window.particleSystem.emitLightningArcs(impactX, impactY, sparkColor, 5);
+    }
 
     // Camera Shake & Hitstop Freeze Frame
     if (camera) {

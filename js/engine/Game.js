@@ -266,8 +266,8 @@ class Game {
       // 1. Arena Background & Parallax layers
       this.arena.renderBackground(this.ctx);
 
-      // 2. Arena Floor
-      this.arena.renderFloor(this.ctx);
+      // 2. Arena Floor with real-time dynamic fighter reflections
+      this.arena.renderFloor(this.ctx, this.player, this.ai);
 
       // 3. Combat Particles (Background layer, like dust & ghost trails)
       this.particles.render(this.ctx);

@@ -154,6 +154,20 @@ body {
   box-shadow: 0 0 15px var(--crimson-glow);
 }
 
+.portrait-svg {
+  display: block;
+  filter: drop-shadow(0 0 6px currentColor);
+  transition: transform 0.2s ease;
+}
+
+.cyan-glow .portrait-svg {
+  color: var(--cyan-primary);
+}
+
+.crimson-glow .portrait-svg {
+  color: var(--crimson-primary);
+}
+
 .fighter-identity {
   display: flex;
   flex-direction: column;

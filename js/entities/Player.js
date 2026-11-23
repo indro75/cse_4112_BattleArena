@@ -4,11 +4,15 @@
 class Player extends Fighter {
   constructor(x, y, facing) {
     super(x, y, facing, {
+      type: 'hero',
       name: 'PLAYER',
+      title: 'CYBER WARRIOR',
       themeColor: '#00f0ff',
-      secondaryColor: '#0077cc',
-      visorColor: '#00f0ff',
-      trailColor: '#00f0ff'
+      secondaryColor: '#0066cc',
+      accentColor: '#ffffff',
+      visorColor: '#00ffff',
+      trailColor: '#00f0ff',
+      coreColor: '#66ffff'
     });
   }
 
