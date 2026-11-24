@@ -25,6 +25,17 @@ class Fighter {
     this.energy = 100;
     this.energyRegenRate = 14; // SP per second
 
+    // Level Progression Attributes & Perks
+    this.level = 1;
+    this.attackMultiplier = 1.0;
+    this.moveSpeedBonus = 0;
+    this.dashRefund = 0;
+    this.passiveAura = null;
+    this.lifeSteal = 0;
+    this.blockReflect = 0;
+    this.superArmor = false;
+    this.superArmorFinisher = false;
+
     // States: IDLE, RUN, JUMP, FALL, CROUCH, ATTACK_1, ATTACK_2, ATTACK_3, SPECIAL, BLOCK, DODGE, HURT, DEFEATED, VICTORY
     this.state = 'IDLE';
     this.stateTimer = 0;
@@ -368,7 +379,7 @@ class Fighter {
     }
 
     this.facing = dir;
-    this.vx = dir * 320;
+    this.vx = dir * (320 + (this.moveSpeedBonus || 0));
 
     if (this.onGround && this.state !== 'RUN') {
       this.changeState('RUN');
@@ -467,6 +478,9 @@ class Fighter {
     if (this.energy < 15) return;
 
     this.energy = Math.max(0, this.energy - 15);
+    if (this.dashRefund > 0) {
+      this.energy = Math.min(this.maxEnergy, this.energy + this.dashRefund);
+    }
     this.changeState('DODGE');
     this.dodgeCooldown = 0.65;
     this.vx = this.facing * 660;
@@ -501,6 +515,14 @@ class Fighter {
       this.changeState('DEFEATED');
       this.vy = -270;
       return;
+    }
+
+    // Check Super Armor frames (ignores light interruption)
+    if (this.superArmor && (this.state === 'ATTACK_3' || this.state === 'SPECIAL')) {
+      causesHitstun = false;
+    }
+    if (this.superArmorFinisher && this.state === 'ATTACK_3') {
+      causesHitstun = false;
     }
 
     if (causesHitstun) {
@@ -585,6 +607,11 @@ class Fighter {
     // Render Energy Aura when charged (SP >= 40) or during Special Attack
     if (this.energy >= 40 || this.state === 'SPECIAL') {
       this.renderEnergyAura(ctx, anim);
+    }
+
+    // Render Level Evolution Aura (Progression Powers)
+    if (this.passiveAura) {
+      this.renderUpgradedAuras(ctx, anim);
     }
 
     // Branch to dedicated character model pipeline!
@@ -1259,6 +1286,159 @@ class Fighter {
       ctx.stroke();
     }
     ctx.restore();
+  }
+
+  /* ==========================================================
+     LEVEL EVOLUTION & UPGRADE AURAS (LEVELS 2 - 5)
+     ========================================================== */
+  renderUpgradedAuras(ctx, anim) {
+    ctx.save();
+    const time = this.animTime;
+    const aura = this.passiveAura;
+
+    if (aura === 'overdrive') {
+      // Overdrive Thruster Plumes & Speed Wisps
+      ctx.strokeStyle = '#00f0ff';
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 16;
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 3; i++) {
+        const ox = -14 - i * 6 + Math.sin(time * 12 + i) * 3;
+        const oy = anim.bodyBob - 20 + i * 16;
+        ctx.beginPath();
+        ctx.moveTo(ox, oy);
+        ctx.lineTo(ox - 18, oy + (Math.random() - 0.5) * 8);
+        ctx.stroke();
+      }
+    } else if (aura === 'thunder') {
+      // Crackling Thunder Dragon Lightning Arcs
+      ctx.strokeStyle = '#ffd700';
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 18;
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 3; i++) {
+        const startX = (i - 1) * 16;
+        const startY = anim.bodyBob - 30 + i * 20;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(startX + (Math.random() - 0.5) * 18, startY - 14);
+        ctx.lineTo(startX + (Math.random() - 0.5) * 26, startY - 26);
+        ctx.stroke();
+      }
+    } else if (aura === 'aegis') {
+      // Aegis Orbiting Hexagonal Shield Matrices
+      ctx.strokeStyle = '#00f0ff';
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 16;
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < 3; i++) {
+        const orbitAngle = time * 2.5 + (i * Math.PI * 2) / 3;
+        const ox = Math.cos(orbitAngle) * 36;
+        const oy = anim.bodyBob - 42 + Math.sin(orbitAngle) * 14;
+        this.drawMiniHex(ctx, ox, oy, 8);
+      }
+    } else if (aura === 'emperor') {
+      // Awakened Dragon Emperor Divine Golden Wings & Halo
+      ctx.strokeStyle = '#ffd700';
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 25;
+      ctx.lineWidth = 2.5;
+
+      // Divine Halo
+      ctx.beginPath();
+      ctx.arc(0, anim.bodyBob - 88, 16, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Dragon Energy Wings
+      for (let side = -1; side <= 1; side += 2) {
+        ctx.beginPath();
+        ctx.moveTo(0, anim.bodyBob - 50);
+        ctx.quadraticCurveTo(side * 42, anim.bodyBob - 85, side * 65 + Math.sin(time * 6) * 6, anim.bodyBob - 70);
+        ctx.quadraticCurveTo(side * 38, anim.bodyBob - 45, 0, anim.bodyBob - 30);
+        ctx.stroke();
+      }
+    } else if (aura === 'crimson_fire') {
+      // Villain Level 2: Crimson Flame Wisps
+      ctx.strokeStyle = '#ff0055';
+      ctx.shadowColor = '#ff3300';
+      ctx.shadowBlur = 18;
+      ctx.lineWidth = 2.5;
+      for (let i = 0; i < 4; i++) {
+        const ox = (i - 1.5) * 12 + Math.sin(time * 9 + i) * 6;
+        const oy = anim.bodyBob - 10;
+        ctx.beginPath();
+        ctx.moveTo(ox, oy);
+        ctx.quadraticCurveTo(ox + 8, oy - 28, ox, oy - 48);
+        ctx.stroke();
+      }
+    } else if (aura === 'void_purple') {
+      // Villain Level 3: Void Rift Lightning & Black Flame
+      ctx.strokeStyle = '#a855f7';
+      ctx.shadowColor = '#7e22ce';
+      ctx.shadowBlur = 22;
+      ctx.lineWidth = 2.5;
+      for (let i = 0; i < 4; i++) {
+        const ox = (i - 1.5) * 15;
+        const oy = anim.bodyBob - 20;
+        ctx.beginPath();
+        ctx.moveTo(ox, oy);
+        ctx.lineTo(ox + (Math.random() - 0.5) * 16, oy - 20);
+        ctx.lineTo(ox + (Math.random() - 0.5) * 24, oy - 42);
+        ctx.stroke();
+      }
+    } else if (aura === 'abyssal_inferno') {
+      // Villain Level 4: Raging Abyssal Inferno
+      ctx.strokeStyle = '#ff0033';
+      ctx.shadowColor = '#000000';
+      ctx.shadowBlur = 24;
+      ctx.lineWidth = 3;
+      for (let i = 0; i < 5; i++) {
+        const ox = (i - 2) * 12 + Math.sin(time * 12 + i) * 5;
+        const oy = anim.bodyBob;
+        ctx.beginPath();
+        ctx.moveTo(ox, oy);
+        ctx.quadraticCurveTo(ox - 10, oy - 35, ox + 6, oy - 62);
+        ctx.stroke();
+      }
+    } else if (aura === 'apocalypse_omega') {
+      // Villain Level 5: Omega Apocalypse Demonic Wings & Horned Halo
+      ctx.strokeStyle = '#ff0033';
+      ctx.shadowColor = '#ff0055';
+      ctx.shadowBlur = 30;
+      ctx.lineWidth = 3;
+
+      // Dark Horned Halo
+      ctx.beginPath();
+      ctx.arc(0, anim.bodyBob - 92, 20, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Jagged Demonic Obsidian Wings
+      for (let side = -1; side <= 1; side += 2) {
+        ctx.beginPath();
+        ctx.moveTo(0, anim.bodyBob - 55);
+        ctx.lineTo(side * 35, anim.bodyBob - 88);
+        ctx.lineTo(side * 74 + Math.sin(time * 8) * 8, anim.bodyBob - 78);
+        ctx.lineTo(side * 48, anim.bodyBob - 45);
+        ctx.lineTo(side * 68, anim.bodyBob - 38);
+        ctx.lineTo(0, anim.bodyBob - 25);
+        ctx.stroke();
+      }
+    }
+
+    ctx.restore();
+  }
+
+  drawMiniHex(ctx, x, y, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const a = (i * Math.PI) / 3;
+      const hx = x + r * Math.cos(a);
+      const hy = y + r * Math.sin(a);
+      if (i === 0) ctx.moveTo(hx, hy);
+      else ctx.lineTo(hx, hy);
+    }
+    ctx.closePath();
+    ctx.stroke();
   }
 
   /* ==========================================================

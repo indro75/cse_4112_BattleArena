@@ -132,6 +132,16 @@ class CombatSystem {
       // Small stamina depletion on block
       defender.energy = Math.max(0, defender.energy - 10);
 
+      // Aegis Nano-Counter Reflection (Hero Level 4+)
+      if (defender.blockReflect > 0) {
+        const reflected = Math.max(1, Math.round(hitbox.damage * defender.blockReflect));
+        attacker.takeDamage(reflected, 0.2, false);
+        window.damageTextSystem.add(`PARRY! -${reflected}`, attacker.x, attacker.y - 45, 'special');
+        defender.energy = Math.min(defender.maxEnergy, defender.energy + 15);
+        window.particleSystem.emitLightningArcs(attacker.x, attacker.y - 45, defender.themeColor || '#00f0ff', 6);
+        if (window.audioManager) window.audioManager.playSpecialBlast();
+      }
+
       // Pushback on defender and attacker
       defender.vx = attacker.facing * 160;
       attacker.vx = -attacker.facing * 120;
@@ -150,11 +160,26 @@ class CombatSystem {
     // 3. Normal or Heavy Hit Lands!
     const isHeavy = hitbox.attackType === 3 || isProjectile;
     const isCritical = isHeavy;
-    let finalDamage = hitbox.damage;
+    let finalDamage = Math.round(hitbox.damage * (attacker.attackMultiplier || 1.0));
 
     // Apply damage
     defender.takeDamage(finalDamage, hitbox.hitstun, true);
     this.totalDamageDealt[attackerRole] += finalDamage;
+
+    // Apply Life-Steal (Hero Level 5 Awakening)
+    if (attacker.lifeSteal > 0) {
+      const healAmount = Math.max(1, Math.round(finalDamage * attacker.lifeSteal));
+      attacker.health = Math.min(attacker.maxHealth, attacker.health + healAmount);
+      window.damageTextSystem.add(`+${healAmount}`, attacker.x, attacker.y - 70, 'block');
+    }
+
+    // Apply Static Lightning Discharge (Hero Level 3+ on Finisher)
+    if (attacker.lightningProc && hitbox.attackType === 3) {
+      const shockDmg = Math.round(40 * (attacker.attackMultiplier || 1.0));
+      defender.takeDamage(shockDmg, 0.1, false);
+      window.damageTextSystem.add(`SHOCK! -${shockDmg}`, defender.x, defender.y - 65, 'critical');
+      window.particleSystem.emitLightningArcs(defender.x, defender.y - 45, '#ffd700', 8);
+    }
 
     // Apply Knockback
     const knockDir = attacker.x < defender.x ? 1 : -1;

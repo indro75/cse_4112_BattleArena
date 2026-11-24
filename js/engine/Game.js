@@ -12,9 +12,13 @@ class Game {
     this.canvas.width = this.width;
     this.canvas.height = this.height;
 
-    // Game State: 'MENU', 'BATTLE', 'PAUSED', 'GAMEOVER'
+    // Game State: 'MENU', 'BATTLE', 'PAUSED', 'LEVELUP', 'GAMEOVER'
     this.state = 'MENU';
     this.difficulty = 'medium';
+
+    // Level Progression System (Level 1 to Level 5)
+    this.currentLevel = 1;
+    this.maxLevel = 5;
 
     // Subsystems
     this.camera = new Camera(this.width, this.height);
@@ -66,11 +70,16 @@ class Game {
     return this.state === 'BATTLE';
   }
 
-  startMatch() {
+  startMatch(level = 1) {
     this.state = 'BATTLE';
+    this.currentLevel = level;
     this.matchTimer = this.roundTime;
     this.matchElapsedTime = 0;
     this.endSequenceTimer = 0;
+
+    // Apply Level Progression to both Hero and Villain
+    this.player.applyLevel(this.currentLevel);
+    this.ai.applyLevel(this.currentLevel);
 
     // Reset entities to initial spawn points
     this.player.reset(340, 580, 1);
@@ -82,9 +91,10 @@ class Game {
     this.particles.clear();
     this.damageTexts.clear();
 
-    // Show Battle HUD
+    // Show Battle HUD & Update Level indicators
     this.ui.showBattleHud();
     this.ui.updateDifficultyBadge(this.difficulty);
+    this.ui.updateLevelBadges(this.currentLevel, this.maxLevel, this.player, this.ai);
 
     // Start Dynamic Cyberpunk Combat BGM
     if (this.audio) {
@@ -93,7 +103,46 @@ class Game {
   }
 
   restartMatch() {
-    this.startMatch();
+    this.startMatch(this.currentLevel);
+  }
+
+  advanceToNextLevel() {
+    this.currentLevel = Math.min(this.maxLevel, this.currentLevel + 1);
+    this.state = 'BATTLE';
+
+    // Apply New Level Upgrades
+    this.player.applyLevel(this.currentLevel);
+    this.ai.applyLevel(this.currentLevel);
+
+    // Reset Positions
+    this.player.reset(340, 580, 1);
+    this.ai.reset(940, 580, -1);
+    this.ai.setDifficulty(this.difficulty);
+
+    this.matchTimer = this.roundTime;
+    this.matchElapsedTime = 0;
+    this.combat.reset();
+    this.particles.clear();
+    this.damageTexts.clear();
+
+    // UI Updates
+    this.ui.hideLevelUpModal();
+    this.ui.updateLevelBadges(this.currentLevel, this.maxLevel, this.player, this.ai);
+    this.ui.showBattleHud();
+
+    if (this.camera) this.camera.shake(10, 0.35);
+    if (this.audio) this.audio.startBGM();
+
+    // Level Announcement
+    setTimeout(() => {
+      if (window.damageTextSystem) {
+        window.damageTextSystem.add(`LEVEL ${this.currentLevel} - ENGAGE!`, 640, 320, 'critical');
+      }
+    }, 200);
+  }
+
+  retryCurrentLevel() {
+    this.startMatch(this.currentLevel);
   }
 
   togglePause() {
@@ -110,12 +159,12 @@ class Game {
 
   quitToMainMenu() {
     this.state = 'MENU';
+    this.currentLevel = 1;
     if (this.audio) this.audio.stopBGM();
     this.ui.showMainMenu();
   }
 
   finishMatch(isVictory) {
-    this.state = 'GAMEOVER';
     if (this.audio) {
       this.audio.stopBGM();
       if (isVictory) {
@@ -134,6 +183,18 @@ class Game {
       this.ai.changeState('VICTORY');
     }
 
+    // Check if player won and there are higher levels remaining!
+    if (isVictory && this.currentLevel < this.maxLevel) {
+      this.state = 'LEVELUP';
+      setTimeout(() => {
+        this.ui.showLevelUpModal(this.currentLevel, this.currentLevel + 1, () => this.advanceToNextLevel());
+      }, 1200);
+      return;
+    }
+
+    // Otherwise, match is officially GAMEOVER (Defeat or Final Grand Victory at Level 5)
+    this.state = 'GAMEOVER';
+
     // Format match duration (MM:SS)
     const mins = Math.floor(this.matchElapsedTime / 60);
     const secs = Math.floor(this.matchElapsedTime % 60);
@@ -141,6 +202,9 @@ class Game {
 
     const resultsData = {
       isVictory,
+      isFinalVictory: isVictory && this.currentLevel === this.maxLevel,
+      currentLevel: this.currentLevel,
+      maxLevel: this.maxLevel,
       duration: durationFormatted,
       remainingHealth: isVictory ? this.player.health : 0,
       maxCombo: this.combat.maxCombos.player,

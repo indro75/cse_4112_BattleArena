@@ -11,8 +11,31 @@ class UIManager {
     this.settingsModal = document.getElementById('settings-modal');
     this.pauseModal = document.getElementById('pause-modal');
     this.resultsModal = document.getElementById('results-modal');
+    this.levelUpModal = document.getElementById('level-up-modal');
     this.aiDebugHud = document.getElementById('ai-debug-hud');
     this.comboDisplay = document.getElementById('combo-display');
+
+    // Progression & Level HUD Elements
+    this.stageBadge = document.getElementById('stage-badge');
+    this.playerLevelBadge = document.getElementById('player-level-badge');
+    this.aiLevelBadge = document.getElementById('ai-level-badge');
+    this.playerHudName = document.getElementById('player-hud-name');
+    this.playerHudTitle = document.getElementById('player-hud-title');
+    this.aiHudName = document.getElementById('ai-hud-name');
+    this.btnContinueLevel = document.getElementById('btn-continue-level');
+    this.btnRetryLevel = document.getElementById('btn-retry-level');
+    this.statLevel = document.getElementById('stat-level');
+
+    // Level-up Modal Elements
+    this.levelupTitle = document.getElementById('levelup-title');
+    this.levelupStageBanner = document.getElementById('levelup-stage-banner');
+    this.heroProgTitle = document.getElementById('hero-prog-title');
+    this.heroProgSubtitle = document.getElementById('hero-prog-subtitle');
+    this.heroProgPerks = document.getElementById('hero-prog-perks');
+    this.bossProgTitle = document.getElementById('boss-prog-title');
+    this.bossProgSubtitle = document.getElementById('boss-prog-subtitle');
+    this.bossProgPerks = document.getElementById('boss-prog-perks');
+    this.onContinueLevelCallback = null;
 
     // HUD Elements
     this.playerHealthBar = document.getElementById('player-health-bar');
@@ -239,9 +262,25 @@ class UIManager {
     });
 
     // Results Menu actions
+    if (this.btnRetryLevel) {
+      this.btnRetryLevel.addEventListener('click', () => {
+        this.hideModal(this.resultsModal);
+        if (window.game) window.game.retryCurrentLevel();
+      });
+    }
+
+    if (this.btnContinueLevel) {
+      this.btnContinueLevel.addEventListener('click', () => {
+        this.hideLevelUpModal();
+        if (this.onContinueLevelCallback) {
+          this.onContinueLevelCallback();
+        }
+      });
+    }
+
     document.getElementById('btn-play-again').addEventListener('click', () => {
       this.hideModal(this.resultsModal);
-      if (window.game) window.game.restartMatch();
+      if (window.game) window.game.startMatch(1);
     });
     document.getElementById('btn-results-menu').addEventListener('click', () => {
       this.hideModal(this.resultsModal);
@@ -320,27 +359,99 @@ class UIManager {
     this.hideModal(this.pauseModal);
   }
 
+  updateLevelBadges(currentLevel, maxLevel, player, ai) {
+    if (this.stageBadge) {
+      this.stageBadge.textContent = `STAGE ${currentLevel} / ${maxLevel}`;
+    }
+    if (this.playerLevelBadge) {
+      this.playerLevelBadge.textContent = `LV.${currentLevel}`;
+    }
+    if (this.aiLevelBadge) {
+      this.aiLevelBadge.textContent = `BOSS LV.${currentLevel}`;
+    }
+    if (this.playerHudTitle && player) {
+      this.playerHudTitle.textContent = player.title || 'CYBER WARRIOR';
+    }
+    if (this.aiHudName && ai) {
+      this.aiHudName.textContent = ai.name || 'MALIK-X';
+    }
+    if (this.aiModeTitle && ai) {
+      this.aiModeTitle.textContent = ai.title || 'CRIMSON REAPER';
+    }
+  }
+
+  showLevelUpModal(currentLevel, nextLevel, onContinue) {
+    this.onContinueLevelCallback = onContinue;
+
+    const heroCfg = window.ProgressionSystem ? window.ProgressionSystem.getHeroConfig(nextLevel) : null;
+    const bossCfg = window.ProgressionSystem ? window.ProgressionSystem.getVillainConfig(nextLevel) : null;
+
+    if (this.levelupStageBanner) {
+      this.levelupStageBanner.textContent = `ADVANCING TO LEVEL ${nextLevel} / 5`;
+    }
+
+    if (heroCfg) {
+      if (this.heroProgTitle) this.heroProgTitle.textContent = heroCfg.upgradeName;
+      if (this.heroProgSubtitle) this.heroProgSubtitle.textContent = heroCfg.upgradeSubtitle;
+      if (this.heroProgPerks) {
+        this.heroProgPerks.innerHTML = heroCfg.perks.map(p => `<li>${p}</li>`).join('');
+      }
+    }
+
+    if (bossCfg) {
+      if (this.bossProgTitle) this.bossProgTitle.textContent = `${bossCfg.name}`;
+      if (this.bossProgSubtitle) this.bossProgSubtitle.textContent = `${bossCfg.title} [${bossCfg.threatLevel}]`;
+      if (this.bossProgPerks) {
+        this.bossProgPerks.innerHTML = bossCfg.bossPerks.map(p => `<li>${p}</li>`).join('');
+      }
+    }
+
+    if (this.btnContinueLevel) {
+      this.btnContinueLevel.querySelector('.btn-text').textContent = `⚔ ENGAGE LEVEL ${nextLevel} BOSS`;
+    }
+
+    this.showModal(this.levelUpModal);
+    if (window.audioManager) window.audioManager.playVictory();
+  }
+
+  hideLevelUpModal() {
+    this.hideModal(this.levelUpModal);
+  }
+
   showResults(results) {
     this.hideModal(this.pauseModal);
+    this.hideModal(this.levelUpModal);
     this.battleHud.classList.add('hidden');
     this.aiDebugHud.classList.add('hidden');
     this.comboDisplay.classList.add('hidden');
     if (window.inputManager) window.inputManager.updateControlsVisibility(false);
 
-    if (results.isVictory) {
+    if (results.isFinalVictory) {
+      this.resultsBanner.textContent = 'GRAND CHAMPION!';
+      this.resultsBanner.className = 'results-banner victory';
+      this.resultsSubtitle.textContent = 'ALL 5 LEVELS CLEARED! ARENA FULLY CONQUERED!';
+      if (this.btnRetryLevel) this.btnRetryLevel.classList.add('hidden');
+    } else if (results.isVictory) {
       this.resultsBanner.textContent = 'VICTORY';
       this.resultsBanner.className = 'results-banner victory';
-      this.resultsSubtitle.textContent = 'NEXUS-9 HAS BEEN DECOMMISSIONED';
+      this.resultsSubtitle.textContent = `LEVEL ${results.currentLevel} BOSS DECOMMISSIONED`;
+      if (this.btnRetryLevel) this.btnRetryLevel.classList.add('hidden');
     } else {
       this.resultsBanner.textContent = 'DEFEAT';
       this.resultsBanner.className = 'results-banner defeat';
-      this.resultsSubtitle.textContent = 'NEURAL SIMULATION TERMINATED BY ENEMY';
+      this.resultsSubtitle.textContent = `FALLEN AT LEVEL ${results.currentLevel} - SIMULATION TERMINATED`;
+      if (this.btnRetryLevel) {
+        this.btnRetryLevel.classList.remove('hidden');
+        this.btnRetryLevel.textContent = `⚔ RETRY LEVEL ${results.currentLevel}`;
+      }
     }
 
     this.statDuration.textContent = results.duration;
-    this.statHealth.textContent = `${Math.round(results.remainingHealth)} HP (${Math.round(results.remainingHealth / 10)}%)`;
+    this.statHealth.textContent = `${Math.round(results.remainingHealth)} HP`;
     this.statMaxCombo.textContent = `${results.maxCombo} HITS`;
-    this.statDifficulty.textContent = results.difficulty.toUpperCase();
+    if (this.statLevel) {
+      this.statLevel.textContent = `LEVEL ${results.currentLevel} / ${results.maxLevel || 5}`;
+    }
     this.statDamageDealt.textContent = results.damageDealt;
     this.statDamageTaken.textContent = results.damageTaken;
 

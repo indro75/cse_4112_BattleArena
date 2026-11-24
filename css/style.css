@@ -347,21 +347,22 @@ body {
 .hud-btn {
   pointer-events: auto;
   cursor: pointer;
-  background: rgba(20, 30, 48, 0.8);
+  background: rgba(20, 30, 48, 0.85);
   border: 1px solid var(--text-dim);
   color: #fff;
-  width: 32px;
-  height: 32px;
-  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 18px;
   transition: all 0.2s;
 }
 
 .hud-btn:hover {
   border-color: var(--cyan-primary);
-  box-shadow: 0 0 8px var(--cyan-glow);
+  box-shadow: 0 0 12px var(--cyan-glow);
   transform: scale(1.1);
 }
 
@@ -588,17 +589,18 @@ body {
   border: 1px solid var(--bg-card-border);
   color: #fff;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 2px;
-  padding: 14px 24px;
+  padding: 16px 28px;
+  min-height: 52px;
   cursor: pointer;
   clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
   transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   text-decoration: none;
 }
 
@@ -614,9 +616,12 @@ body {
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, rgba(0, 153, 255, 0.4) 0%, rgba(0, 240, 255, 0.6) 100%);
+  background: linear-gradient(135deg, rgba(0, 153, 255, 0.45) 0%, rgba(0, 240, 255, 0.65) 100%);
   border-color: var(--cyan-primary);
-  box-shadow: 0 0 18px rgba(0, 240, 255, 0.35);
+  box-shadow: 0 0 22px rgba(0, 240, 255, 0.4);
+  font-size: 18px;
+  padding: 18px 36px;
+  min-height: 58px;
 }
 
 .primary-btn:hover {
@@ -1098,21 +1103,21 @@ body {
 
 /* D-Pad Layout */
 .touch-dpad {
-  width: 140px;
-  height: 140px;
+  width: 170px;
+  height: 170px;
   position: relative;
 }
 
 .dpad-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
+  width: 54px;
+  height: 54px;
+  border-radius: 10px;
   position: absolute;
 }
 
 .dpad-up {
   top: 0;
-  left: 48px;
+  left: 58px;
   clip-path: polygon(50% 0%, 100% 30%, 100% 100%, 0% 100%, 0% 30%);
 }
 
@@ -1120,9 +1125,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 140px;
+  width: 170px;
   position: absolute;
-  top: 48px;
+  top: 58px;
   left: 0;
 }
 
@@ -1133,19 +1138,19 @@ body {
 
 .dpad-center {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 54px;
+  height: 54px;
   background: rgba(6, 10, 18, 0.85);
   border: 1px dashed rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 .touch-center-dot {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   background: var(--cyan-primary);
   border-radius: 50%;
-  box-shadow: 0 0 8px var(--cyan-glow);
+  box-shadow: 0 0 10px var(--cyan-glow);
 }
 
 .dpad-right {
@@ -1155,60 +1160,60 @@ body {
 
 .dpad-down {
   bottom: 0;
-  left: 48px;
+  left: 58px;
   clip-path: polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%);
 }
 
 .touch-icon {
-  font-size: 16px;
+  font-size: 20px;
   color: var(--cyan-primary);
-  text-shadow: 0 0 6px var(--cyan-glow);
+  text-shadow: 0 0 8px var(--cyan-glow);
 }
 
 /* Action Buttons Cluster */
 .touch-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   align-items: flex-end;
 }
 
 .action-row {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   align-items: center;
   justify-content: flex-end;
 }
 
 .action-btn {
-  width: 52px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
   font-family: var(--font-display);
 }
 
 .action-icon {
-  font-size: 19px;
+  font-size: 24px;
   line-height: 1;
 }
 
 .action-sub {
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 800;
   letter-spacing: 1px;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
-/* Primary Attack Button (Prominent) */
+/* Primary Attack Button (Prominent & Extra Large) */
 .btn-attack {
-  width: 64px;
-  height: 64px;
-  background: rgba(0, 150, 255, 0.25);
+  width: 82px;
+  height: 82px;
+  background: rgba(0, 150, 255, 0.28);
   border-color: var(--cyan-primary);
-  box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.45);
 }
 
 .btn-attack .action-icon {
-  font-size: 24px;
+  font-size: 30px;
 }
 
 .btn-attack .action-sub {
@@ -1217,14 +1222,18 @@ body {
 
 /* Special Attack Button */
 .btn-special {
-  width: 54px;
-  height: 54px;
-  background: rgba(255, 183, 0, 0.2);
+  width: 68px;
+  height: 68px;
+  background: rgba(255, 183, 0, 0.22);
   border-color: var(--gold-primary);
 }
 
 .btn-special.touch-active {
-  box-shadow: 0 0 20px rgba(255, 183, 0, 0.8), inset 0 0 10px var(--gold-primary);
+  box-shadow: 0 0 22px rgba(255, 183, 0, 0.85), inset 0 0 12px var(--gold-primary);
+}
+
+.btn-special .action-icon {
+  font-size: 26px;
 }
 
 .btn-special .action-sub {
@@ -1233,11 +1242,12 @@ body {
 
 /* Block & Dodge Secondary Buttons */
 .btn-shield {
-  border-color: rgba(0, 240, 255, 0.5);
+  border-color: rgba(0, 240, 255, 0.55);
 }
 
 .btn-dodge {
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.5);
+}
 }
 
 /* ==========================================================
@@ -1558,47 +1568,61 @@ body {
     height: 6px;
   }
 
-  /* Compact Virtual Gamepad in Landscape */
+  /* Compact Virtual Gamepad in Landscape (Enlarged for Easy Touch) */
   .touch-dpad {
-    width: 126px;
-    height: 126px;
+    width: 150px;
+    height: 150px;
   }
 
   .dpad-btn {
-    width: 38px;
-    height: 38px;
+    width: 48px;
+    height: 48px;
   }
 
-  .dpad-up { left: 44px; }
-  .dpad-horizontal { top: 44px; width: 126px; }
-  .dpad-center { width: 38px; height: 38px; }
-  .dpad-down { left: 44px; }
+  .dpad-up { left: 51px; }
+  .dpad-horizontal { top: 51px; width: 150px; }
+  .dpad-center { width: 48px; height: 48px; }
+  .dpad-down { left: 51px; }
 
   .action-row {
-    gap: 8px;
+    gap: 10px;
   }
 
   .btn-shield, .btn-dodge {
-    width: 42px;
-    height: 42px;
+    width: 52px;
+    height: 52px;
   }
 
   .btn-special {
-    width: 46px;
-    height: 46px;
-  }
-
-  .btn-attack {
     width: 58px;
     height: 58px;
   }
 
+  .btn-attack {
+    width: 72px;
+    height: 72px;
+  }
+
   .action-icon {
-    font-size: 17px;
+    font-size: 20px;
   }
 
   .btn-attack .action-icon {
-    font-size: 21px;
+    font-size: 26px;
+  }
+
+  .btn-special .action-icon {
+    font-size: 22px;
+  }
+
+  .action-sub {
+    font-size: 8px;
+  }
+
+  .hud-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
   }
 
   .stats-grid {
@@ -1629,49 +1653,49 @@ body {
 /* Ultra-Short Viewports (e.g. height <= 380px or mobile browser with toolbars) */
 @media (max-height: 380px) {
   .touch-dpad {
-    width: 110px;
-    height: 110px;
+    width: 130px;
+    height: 130px;
   }
 
   .dpad-btn {
-    width: 34px;
-    height: 34px;
+    width: 42px;
+    height: 42px;
   }
 
-  .dpad-up { left: 38px; }
-  .dpad-horizontal { top: 38px; width: 110px; }
-  .dpad-center { width: 34px; height: 34px; }
-  .dpad-down { left: 38px; }
+  .dpad-up { left: 44px; }
+  .dpad-horizontal { top: 44px; width: 130px; }
+  .dpad-center { width: 42px; height: 42px; }
+  .dpad-down { left: 44px; }
 
   .touch-actions {
     gap: 6px;
   }
 
   .action-row {
-    gap: 6px;
+    gap: 8px;
   }
 
   .btn-shield, .btn-dodge {
-    width: 36px;
-    height: 36px;
+    width: 46px;
+    height: 46px;
   }
 
   .btn-special {
-    width: 40px;
-    height: 40px;
-  }
-
-  .btn-attack {
     width: 50px;
     height: 50px;
   }
 
+  .btn-attack {
+    width: 62px;
+    height: 62px;
+  }
+
   .action-icon {
-    font-size: 15px;
+    font-size: 18px;
   }
 
   .btn-attack .action-icon {
-    font-size: 18px;
+    font-size: 22px;
   }
 
   .action-sub {
@@ -1723,4 +1747,241 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ==========================================================
+   LEVEL PROGRESSION & STAGE HUD STYLING
+   ========================================================== */
+.name-level-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.name-level-row.reverse {
+  flex-direction: row-reverse;
+}
+
+.level-tag-hero {
+  padding: 1px 7px;
+  background: rgba(0, 240, 255, 0.22);
+  border: 1px solid var(--cyan-primary);
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: var(--cyan-primary);
+  text-shadow: 0 0 8px var(--cyan-glow);
+}
+
+.level-tag-boss {
+  padding: 1px 7px;
+  background: rgba(255, 0, 85, 0.25);
+  border: 1px solid var(--crimson-primary);
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #ff3366;
+  text-shadow: 0 0 8px var(--crimson-glow);
+}
+
+.badges-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.badge-stage {
+  padding: 2px 10px;
+  background: linear-gradient(135deg, rgba(255, 183, 0, 0.25), rgba(255, 234, 0, 0.45));
+  border: 1px solid var(--gold-primary);
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #fff;
+  text-shadow: 0 0 10px var(--gold-primary);
+}
+
+/* ==========================================================
+   LEVEL-UP PROGRESSION MODAL
+   ========================================================== */
+.levelup-box {
+  max-width: 680px;
+  width: 92%;
+  padding: 28px 34px;
+  background: radial-gradient(circle at center, rgba(14, 22, 42, 0.98) 0%, rgba(6, 10, 20, 0.98) 100%);
+  border: 1px solid var(--cyan-primary);
+  box-shadow: 0 0 50px rgba(0, 240, 255, 0.35);
+}
+
+.levelup-header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.cleared-tag {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--gold-primary);
+  font-weight: 800;
+  margin-bottom: 4px;
+  text-shadow: 0 0 10px var(--gold-primary);
+}
+
+.levelup-stage-badge {
+  display: inline-block;
+  padding: 4px 18px;
+  background: rgba(0, 240, 255, 0.16);
+  border: 1px solid var(--cyan-primary);
+  border-radius: 4px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--cyan-primary);
+  letter-spacing: 2px;
+  margin-top: 8px;
+  text-shadow: 0 0 10px var(--cyan-glow);
+}
+
+.progression-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.prog-card {
+  background: rgba(10, 16, 28, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 6px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+
+.hero-prog-card {
+  border-color: rgba(0, 240, 255, 0.4);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
+}
+
+.boss-prog-card {
+  border-color: rgba(255, 0, 85, 0.4);
+  box-shadow: 0 0 20px rgba(255, 0, 85, 0.15);
+}
+
+.prog-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.prog-card-top.cyan-border {
+  border-color: rgba(0, 240, 255, 0.35);
+}
+
+.prog-card-top.crimson-border {
+  border-color: rgba(255, 0, 85, 0.35);
+}
+
+.prog-card-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.prog-card-top h3 {
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+
+.hero-prog-card h3 {
+  color: var(--cyan-primary);
+}
+
+.boss-prog-card h3 {
+  color: #ff3366;
+}
+
+.prog-card-sub {
+  font-size: 10px;
+  font-family: var(--font-display);
+  letter-spacing: 1px;
+  color: var(--text-dim);
+}
+
+.prog-perk-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+  color: #e2e8f0;
+}
+
+.prog-perk-list li {
+  position: relative;
+  padding-left: 16px;
+  line-height: 1.4;
+}
+
+.hero-prog-card .prog-perk-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--cyan-primary);
+  font-weight: 900;
+}
+
+.boss-prog-card .prog-perk-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--crimson-primary);
+  font-weight: 900;
+}
+
+.levelup-actions {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.pulse-button {
+  animation: pulse-glow 1.8s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 32px var(--cyan-glow), 0 0 10px #ffffff;
+    transform: scale(1.02);
+  }
+}
+
+@media (max-width: 600px) {
+  .progression-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .levelup-box {
+    padding: 16px 20px;
+  }
+}
+
 

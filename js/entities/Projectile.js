@@ -4,7 +4,7 @@
  * and Villain (Demonic Dark Matter Singularity Skull).
  */
 class Projectile {
-  constructor(x, y, vx, vy, facing, owner, color = '#00f0ff', damage = 185) {
+  constructor(x, y, vx, vy, facing, owner, color = '#00f0ff', damage = 185, scale = 1.0) {
     this.x = x;
     this.y = y;
     this.vx = vx * facing;
@@ -14,7 +14,8 @@ class Projectile {
     this.type = owner ? owner.type : 'hero';
     this.color = color;
     this.damage = damage;
-    this.radius = 20;
+    this.scale = scale;
+    this.radius = 20 * scale;
     this.lifetime = 1.8;
     this.spent = false;
     this.time = 0;
@@ -79,7 +80,7 @@ class Projectile {
 
     ctx.save();
     ctx.translate(this.x, this.y);
-    ctx.scale(this.facing, 1);
+    ctx.scale(this.facing * this.scale, this.scale);
 
     if (this.type === 'hero') {
       this.renderHeroBladeWave(ctx);

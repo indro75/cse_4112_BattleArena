@@ -31,8 +31,11 @@
             </svg>
           </div>
           <div class="fighter-identity">
-            <span class="fighter-name">REN</span>
-            <span class="fighter-title">CYBER BLADEMASTER</span>
+            <div class="name-level-row">
+              <span id="player-hud-name" class="fighter-name">REN</span>
+              <span id="player-level-badge" class="level-tag-hero">LV.1</span>
+            </div>
+            <span id="player-hud-title" class="fighter-title">CYBER BLADEMASTER</span>
           </div>
         </div>
         <div class="bars-container">
@@ -53,7 +56,10 @@
         <div class="timer-box">
           <span id="round-timer">99</span>
         </div>
-        <div id="difficulty-badge" class="badge-medium">MEDIUM</div>
+        <div class="badges-row">
+          <div id="stage-badge" class="badge-stage">STAGE 1/5</div>
+          <div id="difficulty-badge" class="badge-medium">MEDIUM</div>
+        </div>
         <button id="btn-pause-ingame" class="hud-btn" title="Pause Game (Esc)">⏸</button>
       </div>
 
@@ -71,8 +77,11 @@
             </svg>
           </div>
           <div class="fighter-identity text-right">
-            <span class="fighter-name">MALIK-X</span>
-            <span class="fighter-title" id="ai-mode-title">VOID MECHA</span>
+            <div class="name-level-row reverse">
+              <span id="ai-hud-name" class="fighter-name">MALIK-X</span>
+              <span id="ai-level-badge" class="level-tag-boss">BOSS LV.1</span>
+            </div>
+            <span class="fighter-title" id="ai-mode-title">CYBER PROTO-SLAYER</span>
           </div>
         </div>
         <div class="bars-container reverse">
@@ -439,6 +448,53 @@
       </div>
     </div>
 
+    <!-- LEVEL UP & PROGRESSION OVERLAY -->
+    <div id="level-up-modal" class="overlay-screen hidden modal">
+      <div class="modal-box levelup-box">
+        <div class="levelup-header">
+          <div class="cleared-tag">★ LEVEL COMPLETE ★</div>
+          <h2 id="levelup-title" class="modal-title glitch-title" data-text="HERO ASCENSION!">HERO ASCENSION!</h2>
+          <div id="levelup-stage-banner" class="levelup-stage-badge">ADVANCING TO LEVEL 2</div>
+        </div>
+
+        <div class="progression-cards">
+          <!-- Hero Unlocked Power Card -->
+          <div class="prog-card hero-prog-card">
+            <div class="prog-card-top cyan-border">
+              <span class="prog-card-icon">⚡</span>
+              <div>
+                <h3 id="hero-prog-title">PLASMA OVERDRIVE</h3>
+                <span id="hero-prog-subtitle" class="prog-card-sub">HERO POWER UNLOCKED</span>
+              </div>
+            </div>
+            <ul id="hero-prog-perks" class="prog-perk-list">
+              <!-- populated dynamically -->
+            </ul>
+          </div>
+
+          <!-- Incoming Boss Preview Card -->
+          <div class="prog-card boss-prog-card">
+            <div class="prog-card-top crimson-border">
+              <span class="prog-card-icon">💀</span>
+              <div>
+                <h3 id="boss-prog-title">MALIK-X: WARLORD</h3>
+                <span id="boss-prog-subtitle" class="prog-card-sub">NEXT BOSS INCOMING</span>
+              </div>
+            </div>
+            <ul id="boss-prog-perks" class="prog-perk-list">
+              <!-- populated dynamically -->
+            </ul>
+          </div>
+        </div>
+
+        <div class="levelup-actions">
+          <button id="btn-continue-level" class="cyber-btn primary-btn pulse-button">
+            <span class="btn-text">⚔ ENGAGE NEXT LEVEL BOSS</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- MATCH RESULTS OVERLAY -->
     <div id="results-modal" class="overlay-screen hidden modal">
       <div class="modal-box results-box">
@@ -459,8 +515,8 @@
             <span id="stat-max-combo" class="stat-value">5 HITS</span>
           </div>
           <div class="stat-card">
-            <span class="stat-label">AI DIFFICULTY</span>
-            <span id="stat-difficulty" class="stat-value">MEDIUM</span>
+            <span class="stat-label">CURRENT LEVEL</span>
+            <span id="stat-level" class="stat-value">LEVEL 1 / 5</span>
           </div>
           <div class="stat-card">
             <span class="stat-label">DAMAGE DEALT</span>
@@ -473,6 +529,7 @@
         </div>
 
         <div class="results-actions">
+          <button id="btn-retry-level" class="cyber-btn primary-btn hidden">⚔ RETRY LEVEL</button>
           <button id="btn-play-again" class="cyber-btn primary-btn">PLAY AGAIN</button>
           <button id="btn-results-menu" class="cyber-btn">MAIN MENU</button>
         </div>
@@ -488,6 +545,7 @@
   <script src="js/combat/DamageText.js"></script>
   <script src="js/combat/Hitbox.js"></script>
   <script src="js/combat/CombatSystem.js"></script>
+  <script src="js/engine/ProgressionSystem.js"></script>
   <script src="js/arena/Arena.js"></script>
   <script src="js/entities/Projectile.js"></script>
   <script src="js/entities/Fighter.js"></script>
